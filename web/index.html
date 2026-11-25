@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DG-LAB V4 控制台</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12h2l2-6 3 12 3-9 2 6 2-3h2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>DG-LAB 控制台<span class="ver">V4</span></h1>
+    </div>
+  </div>
+  <div class="head-status">
+    <span class="pill" id="statusPill"><span class="dot" id="statusDot"></span><span id="statusText">未连接</span></span>
+    <span class="head-metric"><span class="status-sep">·</span> APP <span class="v" id="headClients">0</span></span>
+    <span class="head-metric opt"><span class="status-sep">·</span> 在线 <span class="v uptime" id="uptime">--:--</span></span>
+    <span class="head-metric"><span class="status-sep">·</span> 控制方 <code id="targetId">-</code></span>
+  </div>
+</header>
+
+<script>window.WS_PREFIX = __WS_PREFIX__;</script>
+
+<main>
+  <!-- 连接与配对 -->
+  <section class="card" id="connectCard">
+    <div class="card-head">
+      <h2><span class="num">1</span>连接与配对 <span class="sub">浏览器作为控制方，手机扫码接入</span></h2>
+      <span class="badge" id="connBadge">未连接</span>
+    </div>
+    <div class="row">
+      <label for="wsUrl">WebSocket 地址 <span class="field-hint">地址会自动保存在浏览器中，刷新不丢</span></label>
+      <div class="btn-row" style="flex-wrap:nowrap;">
+        <input id="wsUrl" type="text" placeholder="ws://192.168.1.X:9998" style="flex:1;">
+        <button id="btnConnect" class="primary">连接</button>
+        <button id="btnDisconnect" disabled>断开</button>
+      </div>
+    </div>
+    <div class="pair-box">
+      <div id="qrcode" class="qr-box"><span class="qr-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z"/></svg>
+        连接后显示配对二维码
+      </span></div>
+      <div class="pair-info">
+        <p class="muted">用 DG-LAB 4 APP 扫码接入；多个 APP 扫同一码可实现一对多控制。</p>
+        <div class="row">
+          <label for="pairUrl">配对链接 <span class="field-hint">可复制后用 APP 打开</span></label>
+          <input id="pairUrl" type="text" readonly placeholder="连接后生成">
+        </div>
+        <div class="btn-row">
+          <button id="btnCopyPair" class="ghost" disabled>复制链接</button>
+          <span class="hint">手机需与电脑在同一局域网</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid-2">
+    <!-- 客户端与设备 -->
+    <section class="card">
+      <div class="card-head">
+        <h2><span class="num">2</span>已接入的 APP</h2>
+        <span class="badge" id="clientCount">0</span>
+      </div>
+      <ul id="clientList" class="list"><li class="empty">暂无 APP 接入</li></ul>
+      <div class="sub-head">设备列表 <span class="muted" id="deviceHint">(选中 APP 后显示)</span></div>
+      <ul id="deviceList" class="list devices"><li class="empty">暂无设备</li></ul>
+    </section>
+
+    <!-- 实时控制 -->
+    <section class="card">
+      <div class="card-head">
+        <h2><span class="num">3</span>实时控制 <span class="sub">指令下发到选中的 APP</span></h2>
+      </div>
+      <div class="row">
+        <label for="selClient">目标 APP</label>
+        <select id="selClient"><option value="">-- 未接入 --</option></select>
+      </div>
+      <div class="row split">
+        <div><label for="selSlot">设备 slot</label><select id="selSlot"><option value="">-- 无设备 --</option></select></div>
+        <div>
+          <label>通道</label>
+          <div class="segment" id="chSegment">
+            <button type="button" data-ch="0" class="active ch-a">A · 通道 0</button>
+            <button type="button" data-ch="1" class="ch-b">B · 通道 1</button>
+          </div>
+          <select id="selChannel" style="display:none;"><option value="0">A</option><option value="1">B</option></select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="group-title">强度增减 <span class="muted">相对当前值</span></div>
+        <div class="btn-row">
+          <input id="intStep" type="number" value="5" min="1" max="200" class="tiny" aria-label="增减步长">
+          <button data-op="add">增加 +</button>
+          <button data-op="reduce">减少 −</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="group-title">临时强度 <span class="muted">任务结束自动归零 · 拖动滑块或输入数值</span></div>
+        <div class="slider-row">
+          <input id="tempSlider" type="range" min="0" max="200" step="1" value="30" aria-label="临时强度滑块">
+          <input id="tempValue" type="number" value="30" min="0" max="200" class="tiny" aria-label="临时强度数值">
+          <input id="tempDuration" type="number" value="3000" min="0" step="100" class="mid" aria-label="持续毫秒">
+          <button data-op="temp" class="primary">下发</button>
+        </div>
+        <div class="quick-levels">
+          <span class="muted" style="align-self:center;">快捷档位</span>
+          <button type="button" data-level="10">10</button>
+          <button type="button" data-level="20">20</button>
+          <button type="button" data-level="30">30</button>
+          <button type="button" data-level="50">50</button>
+          <button type="button" data-level="100">100</button>
+          <button type="button" data-level="150">150</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="group-title">归零 / 清除</div>
+        <div class="btn-row">
+          <button data-op="reset">通道归零</button>
+          <button data-op="clearChannel" class="warn">清空本通道任务</button>
+          <button data-op="clearAll" class="warn">清空全部任务</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="group-title">波形 Pulse <span class="muted">官方内置帧 · 每帧约 100ms · 需先设通道强度</span></div>
+        <div class="row split">
+          <div><label for="selPreset">预设</label>
+            <select id="selPreset">
+              <option value="">-- 自定义 --</option>
+              <option value="steady">持续输出(测试用)</option>
+              <option value="pinpoint">精准打击</option>
+              <option value="beat">脉搏</option>
+              <option value="candy">跳跳糖</option>
+              <option value="breath">呼吸渐强</option>
+            </select>
+          </div>
+          <div><label for="pulseDuration">时长 ms <span class="field-hint">0 = 不限</span></label>
+            <input id="pulseDuration" type="number" value="0" min="0" step="100">
+          </div>
+        </div>
+        <div class="row">
+          <label for="pulseFrames">帧数组 (JSON)</label>
+          <input id="pulseFrames" type="text" value='["6464646464646464","6464646464646464"]'>
+        </div>
+        <div class="btn-row"><button data-op="pulse" class="primary">发送波形</button></div>
+      </div>
+
+      <div class="control-group">
+        <div class="group-title">原始 RPC <span class="muted">高级：直接编辑 data 对象</span></div>
+        <div class="row"><textarea id="rawData" rows="3" placeholder='{"t":"req","m":"devices.get"}'></textarea></div>
+        <div class="btn-row"><button data-op="raw">发送到选中 APP</button></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 脚本播放 -->
+  <section class="card" id="scriptCard">
+    <div class="card-head">
+      <h2><span class="num">4</span>脚本播放 <span class="sub">上传 .pulse 明文或 JSON 帧数组 · A/B 独立播放</span></h2>
+    </div>
+    <div class="script-channels">
+      <div class="script-panel" data-channel="0">
+        <div class="script-panel-head"><span class="ch-tag ch-a">通道 A</span><span class="muted">c:0</span><span class="script-time" style="margin-left:auto;font-size:11px;color:#98a1ad;">-- / --</span></div>
+        <div class="row"><label>脚本文件</label><input type="file" class="script-file" accept=".pulse,.json,.txt"></div>
+        <div class="script-meta">未加载脚本</div>
+        <div class="script-wave"><canvas class="script-canvas" width="480" height="52"></canvas></div>
+        <div class="script-progress"><i></i></div>
+        <div class="btn-row">
+          <button class="script-play primary" disabled>▶ 播放</button>
+          <button class="script-stop warn" disabled>■ 停止</button>
+        </div>
+        <div class="script-status">就绪</div>
+      </div>
+      <div class="script-panel" data-channel="1">
+        <div class="script-panel-head"><span class="ch-tag ch-b">通道 B</span><span class="muted">c:1</span><span class="script-time" style="margin-left:auto;font-size:11px;color:#98a1ad;">-- / --</span></div>
+        <div class="row"><label>脚本文件</label><input type="file" class="script-file" accept=".pulse,.json,.txt"></div>
+        <div class="script-meta">未加载脚本</div>
+        <div class="script-wave"><canvas class="script-canvas" width="480" height="52"></canvas></div>
+        <div class="script-progress"><i></i></div>
+        <div class="btn-row">
+          <button class="script-play primary" disabled>▶ 播放</button>
+          <button class="script-stop warn" disabled>■ 停止</button>
+        </div>
+        <div class="script-status">就绪</div>
+      </div>
+    </div>
+    <p class="muted script-note">播放前请确认目标通道已有强度，否则不会震动。强度值需为 10 的倍数。</p>
+  </section>
+
+  <!-- 录制回放 -->
+  <section class="card">
+    <div class="card-head">
+      <h2><span class="num">5</span>录制与回放 <span class="sub">按原始时间间隔重发指令</span></h2>
+      <span class="badge" id="recordCount">0 条</span>
+    </div>
+    <div class="btn-row">
+      <button id="btnRecord" data-op="record">● 开始录制</button>
+      <button id="btnStopRecord" disabled>■ 停止</button>
+      <button id="btnReplay" disabled>▶ 回放</button>
+      <button id="btnClearRecord" class="ghost">清空</button>
+    </div>
+  </section>
+
+  <!-- 日志 -->
+  <section class="card">
+    <div class="card-head">
+      <h2><span class="num">6</span>实时日志</h2>
+    </div>
+    <div class="log-toolbar">
+      <div class="filters" id="logFilters">
+        <button type="button" data-filter="all" class="active">全部</button>
+        <button type="button" data-filter="in">收到</button>
+        <button type="button" data-filter="out">发出</button>
+        <button type="button" data-filter="evt">事件</button>
+        <button type="button" data-filter="err">错误</button>
+      </div>
+      <input id="logSearch" class="search" type="text" placeholder="搜索日志…">
+      <span class="spacer"></span>
+      <label class="toggle"><input id="logAuto" type="checkbox" checked> 自动滚动</label>
+      <button id="logExport" class="ghost">导出</button>
+      <button id="btnClearLog" class="ghost">清空</button>
+    </div>
+    <div id="log" class="log"></div>
+  </section>
+</main>
+
+<div id="toastWrap"></div>
+
+<script src="/qrcode.min.js"></script>
+<script src="/pulse-parser.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

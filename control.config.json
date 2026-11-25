@@ -1,0 +1,19 @@
+{
+  "v4Url": "ws://127.0.0.1:9998",
+  "advertiseUrl": "ws://192.168.1.X:9998",
+  "api": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 9997,
+    "token": "",
+    "waitTimeoutMs": 5000
+  },
+  "timelineEnabled": false,
+  "loop": true,
+  "loopDelayMs": 2000,
+  "timeline": [
+    { "at": 0,    "op": "temp",  "channel": 0, "value": 30, "duration": 6000 },
+    { "at": 500,  "op": "pulse", "channel": 0, "frames": ["6464646464646464", "0000000000000000", "6464646464646464", "0000000000000000"], "duration": 5000 },
+    { "at": 6200, "op": "clear", "channel": 0 }
+  ]
+}

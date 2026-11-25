@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    KORRIDOR 血量桥接插件（BepInEx 6 / Unity IL2CPP 版）。
+
+    背景：游戏 2026-11-23 更新后从 Unity Mono 切到 IL2CPP，BepInEx 5 + 反射方案失效。
+    本版迁移到 BepInEx 6 + 原生 il2cpp API，编译期不依赖任何游戏 DLL：
+    只引用官方 NuGet 包，运行时按配置里的类名/字段名动态查找。
+
+    编译：
+      dotnet build KorridorHpBridge.csproj -c Release
+    产物：
+      bin/Release/netstandard2.1/KorridorHpBridge.dll
+    安装：
+      复制到 <游戏目录>\BepInEx\plugins\ 下。
+    依赖：
+      游戏目录需已装 BepInEx 6 IL2CPP bleeding-edge #793 或更新（内置支持 Unity 6000.2
+      的 IL2CPP metadata v31）。pre.2 自带老 Cpp2IL 只支持 v23-29，无法解析本游戏。
+      #793 起 BasePlugin 命名空间改为 BepInEx.Unity.IL2CPP，本插件已同步。
+  -->
+  <PropertyGroup>
+    <!-- BE793 的 BepInEx.Unity.IL2CPP 包要求 net6.0（BepInEx 6 运行时即 .NET 6） -->
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>KorridorHpBridge</AssemblyName>
+    <RootNamespace>KorridorHpBridge</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <Version>2.0.0</Version>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BE793 起新包名/命名空间为 BepInEx.Unity.IL2CPP（旧 BepInEx.IL2CPP 停在 pre.1） -->
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.793" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+  </ItemGroup>
+</Project>
