@@ -1,4 +1,4 @@
-# DG-LAB 震动联动 · 分享包
+# DG-LAB 负鼠震动联动 · 分享包
 
 **第一次用？直接打开 [START_HERE.md](START_HERE.md)（新手教程），照着做就行。**
 
