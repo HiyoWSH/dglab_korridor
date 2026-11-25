@@ -17,7 +17,6 @@
 | web/ | 网页控制台前端 |
 | korridor-bridge/ | BepInEx 插件源码 + 配置模板 |
 | prebuilt/ | 编译好的插件 DLL（可直接用） |
-| third-party/ | BepInEx 6 IL2CPP 安装包（Unity 6000.2 用） |
 
 ## 三步跑通（详见新手教程）
 
@@ -32,7 +31,7 @@ bun run korridor  # 窗口3：游戏联动（可选，玩游戏才需要）
 1. **先改 IP**：`control.config.json` 的 `advertiseUrl` 要改成你电脑的局域网 IP，否则手机扫不上。用 `ipconfig` 查。
 2. **只保留 V4**：这个包是纯 V4 版本，V3 已移除。
 3. **需要 Bun**：运行需要 Bun ≥1.3，安装见新手教程第 1.1 节。
-4. **游戏联动**：KORRIDOR 已更新为 IL2CPP 构建，必须用包内的 BepInEx 6（BE793），不要用老的 BepInEx 5。
+4. **游戏联动**：KORRIDOR 已更新为 IL2CPP 构建，必须用 BepInEx 6（BE793），不要用老的 BepInEx 5，**BepInEx项目内并不提供，请自行下载**。
 
 ## 链路图
 
