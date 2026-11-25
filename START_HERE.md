@@ -84,7 +84,6 @@ dglab-kit/
 ├── web/                 ← 网页控制台
 ├── korridor-bridge/     ← 游戏插件源码
 ├── prebuilt/            ← 编译好的插件 DLL
-└── third-party/         ← BepInEx 安装包
 ```
 
 ---
@@ -199,7 +198,7 @@ D:\SteamLibrary\steamapps\common\KORRIDOR\KORRIDOR\
 ### 第 2 步：安装 BepInEx（游戏的插件框架）
 
 1. **先确认游戏没在运行**（任务管理器里没有 `KORRIDOR.exe`）。
-2. 打开包里的 `third-party/` 文件夹，把里面的
+2. 将BepInEx（自行下载）
    `BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.793.zip`
    **解压到游戏目录**（就是有 `KORRIDOR.exe` 的那一层）。
    解压后游戏目录里会多出 `BepInEx/` 文件夹、`winhttp.dll`、`doorstop_config.ini`。
@@ -284,7 +283,7 @@ Bun 没装好，或装完没重开终端。回到 1.1 重装并**重新打开 Po
 ### Q5：游戏更新后插件失效了
 游戏（Unity 6000.2）更新后，BepInEx 可能要重装：
 1. 彻底退出游戏。
-2. 把 `third-party/` 里的 BepInEx 包重新解压覆盖到游戏目录。
+2. 把 BepInEx 包重新解压覆盖到游戏目录。
 3. **保留** `BepInEx\plugins\KorridorHpBridge.dll` 和 `BepInEx\config\` 里的配置（解压时别删它们）。
 4. 重启游戏。
 
